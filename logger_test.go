@@ -18,7 +18,7 @@ func TestLogger(t *testing.T) {
 
 	Debug("debug log")
 	Error("error log")
-	Info("remote", "info log")
+	Info("info log")
 	Fatal("fatal log")
 	time.Sleep(1 * time.Second)
 }

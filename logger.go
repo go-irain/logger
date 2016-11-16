@@ -267,7 +267,7 @@ func Trace(level int, v ...interface{}) bool {
 		go httpLog(logStr)
 	}
 	if level >= logLevel {
-		logObj.lg.Output(3, msg)
+		logObj.lg.Output(3, logStr)
 	}
 	return true
 }
