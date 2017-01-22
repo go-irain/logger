@@ -15,14 +15,15 @@ func TestLogger(t *testing.T) {
 	//根据配置文件，设置日志路径，日志名，日志切割大小限制
 	SetRollingFile("./", "a.log", 10, 50, MB)
 	//设置远程告警地址及服务id
-	SetRemoteUrl("http://url:port/api/alert/report")
-	SetRemoteServerId("1")
+	SetRemoteUrl("http://121.41.118.120:8092/api/alert/report")
+	SetRemoteServerId("8")
 	Log("log start")
 	Debug("debug log")
 	Info("info log")
 	Warn("warn log")
 	Error("error log")
 	Fatal("fatal log")
+	Info("remote", "你好")
 	time.Sleep(1 * time.Second)
 }
 

@@ -264,7 +264,8 @@ func Trace(level int, v ...interface{}) bool {
 	logStr := buildConsoleMessage(level, msg)
 	console(logStr)
 	if v[0] != nil && v[0].(string) == "remote" {
-		go httpLog(logStr)
+		remoteMsg := Concat(" ", v[1:]...)
+		go httpLog(remoteMsg)
 	}
 	if level >= logLevel {
 		logObj.lg.Output(3, GetTraceLevelName(level)+" "+msg)

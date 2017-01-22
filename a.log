@@ -1,0 +1,63 @@
+2017/01/22 10:17:33 logger_test.go:21: DEBUG debug log
+2017/01/22 10:17:33 logger_test.go:22: INFO info log
+2017/01/22 10:17:33 logger_test.go:23: WARN warn log
+2017/01/22 10:17:33 logger_test.go:24: ERROR error log
+2017/01/22 10:17:33 logger_test.go:25: FATAL fatal log
+2017/01/22 10:17:34 logger_test.go:32: INFO aaaaaaaaaaaaaaaaaa := 0
+2017/01/22 10:17:34 logger_test.go:32: INFO aaaaaaaaaaaaaaaaaa := 1
+2017/01/22 10:17:34 logger_test.go:32: INFO aaaaaaaaaaaaaaaaaa := 2
+2017/01/22 10:17:34 logger_test.go:32: INFO aaaaaaaaaaaaaaaaaa := 3
+2017/01/22 10:17:34 logger_test.go:32: INFO aaaaaaaaaaaaaaaaaa := 4
+2017/01/22 10:17:34 logger_test.go:32: INFO aaaaaaaaaaaaaaaaaa := 5
+2017/01/22 10:17:34 logger_test.go:32: INFO aaaaaaaaaaaaaaaaaa := 6
+2017/01/22 10:17:34 logger_test.go:32: INFO aaaaaaaaaaaaaaaaaa := 7
+2017/01/22 10:17:34 logger_test.go:32: INFO aaaaaaaaaaaaaaaaaa := 8
+2017/01/22 10:17:34 logger_test.go:32: INFO aaaaaaaaaaaaaaaaaa := 9
+2017/01/22 10:18:23 logger_test.go:21: DEBUG debug log
+2017/01/22 10:18:23 logger_test.go:22: INFO info log
+2017/01/22 10:18:23 logger_test.go:23: WARN warn log
+2017/01/22 10:18:23 logger_test.go:24: ERROR error log
+2017/01/22 10:18:23 logger_test.go:25: FATAL fatal log
+2017/01/22 10:18:23 logger_test.go:26: INFO remote 你好
+2017/01/22 10:18:24 logger_test.go:33: INFO aaaaaaaaaaaaaaaaaa := 0
+2017/01/22 10:18:24 logger_test.go:33: INFO aaaaaaaaaaaaaaaaaa := 1
+2017/01/22 10:18:24 logger_test.go:33: INFO aaaaaaaaaaaaaaaaaa := 2
+2017/01/22 10:18:24 logger_test.go:33: INFO aaaaaaaaaaaaaaaaaa := 3
+2017/01/22 10:18:24 logger_test.go:33: INFO aaaaaaaaaaaaaaaaaa := 4
+2017/01/22 10:18:24 logger_test.go:33: INFO aaaaaaaaaaaaaaaaaa := 5
+2017/01/22 10:18:24 logger_test.go:33: INFO aaaaaaaaaaaaaaaaaa := 6
+2017/01/22 10:18:24 logger_test.go:33: INFO aaaaaaaaaaaaaaaaaa := 7
+2017/01/22 10:18:24 logger_test.go:33: INFO aaaaaaaaaaaaaaaaaa := 8
+2017/01/22 10:18:24 logger_test.go:33: INFO aaaaaaaaaaaaaaaaaa := 9
+2017/01/22 10:19:35 logger_test.go:21: DEBUG debug log
+2017/01/22 10:19:35 logger_test.go:22: INFO info log
+2017/01/22 10:19:35 logger_test.go:23: WARN warn log
+2017/01/22 10:19:35 logger_test.go:24: ERROR error log
+2017/01/22 10:19:35 logger_test.go:25: FATAL fatal log
+2017/01/22 10:19:35 logger_test.go:26: INFO remote 你好
+2017/01/22 10:19:36 logger_test.go:33: INFO aaaaaaaaaaaaaaaaaa := 0
+2017/01/22 10:19:36 logger_test.go:33: INFO aaaaaaaaaaaaaaaaaa := 1
+2017/01/22 10:19:36 logger_test.go:33: INFO aaaaaaaaaaaaaaaaaa := 2
+2017/01/22 10:19:36 logger_test.go:33: INFO aaaaaaaaaaaaaaaaaa := 3
+2017/01/22 10:19:36 logger_test.go:33: INFO aaaaaaaaaaaaaaaaaa := 4
+2017/01/22 10:19:36 logger_test.go:33: INFO aaaaaaaaaaaaaaaaaa := 5
+2017/01/22 10:19:36 logger_test.go:33: INFO aaaaaaaaaaaaaaaaaa := 6
+2017/01/22 10:19:36 logger_test.go:33: INFO aaaaaaaaaaaaaaaaaa := 7
+2017/01/22 10:19:36 logger_test.go:33: INFO aaaaaaaaaaaaaaaaaa := 8
+2017/01/22 10:19:36 logger_test.go:33: INFO aaaaaaaaaaaaaaaaaa := 9
+2017/01/22 10:19:46 logger_test.go:21: DEBUG debug log
+2017/01/22 10:19:46 logger_test.go:22: INFO info log
+2017/01/22 10:19:46 logger_test.go:23: WARN warn log
+2017/01/22 10:19:46 logger_test.go:24: ERROR error log
+2017/01/22 10:19:46 logger_test.go:25: FATAL fatal log
+2017/01/22 10:19:46 logger_test.go:26: INFO remote 你好
+2017/01/22 10:19:47 logger_test.go:33: INFO aaaaaaaaaaaaaaaaaa := 0
+2017/01/22 10:19:47 logger_test.go:33: INFO aaaaaaaaaaaaaaaaaa := 1
+2017/01/22 10:19:47 logger_test.go:33: INFO aaaaaaaaaaaaaaaaaa := 2
+2017/01/22 10:19:47 logger_test.go:33: INFO aaaaaaaaaaaaaaaaaa := 3
+2017/01/22 10:19:47 logger_test.go:33: INFO aaaaaaaaaaaaaaaaaa := 4
+2017/01/22 10:19:47 logger_test.go:33: INFO aaaaaaaaaaaaaaaaaa := 5
+2017/01/22 10:19:47 logger_test.go:33: INFO aaaaaaaaaaaaaaaaaa := 6
+2017/01/22 10:19:47 logger_test.go:33: INFO aaaaaaaaaaaaaaaaaa := 7
+2017/01/22 10:19:47 logger_test.go:33: INFO aaaaaaaaaaaaaaaaaa := 8
+2017/01/22 10:19:47 logger_test.go:33: INFO aaaaaaaaaaaaaaaaaa := 9
