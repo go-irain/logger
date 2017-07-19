@@ -64,10 +64,14 @@ var consoleAppender bool = false
 const DATEFORMAT = "2006-01-02"
 
 var logFormat string = "%s %s"
-var consoleFormat string = "%s %s:%d %s %s"
+var consoleFormat string = "%s:%d %s %s"
 
 func SetConsole(isConsole bool) {
 	consoleAppender = isConsole
+}
+
+func New() {
+	logObj = &_FILE{dir: "", filename: "", mu: new(sync.RWMutex)}
 }
 
 func SetLevel(_level int) {
@@ -166,7 +170,7 @@ func Concat(delimiter string, input ...interface{}) string {
 }
 
 func console(msg string) {
-	if consoleAppender {
+	if logObj.logfile == nil || consoleAppender {
 		log.Print(msg)
 	}
 }
@@ -238,7 +242,7 @@ func getTraceFileLine() (string, int) {
 
 func buildConsoleMessage(level int, msg string) string {
 	file, line := getTraceFileLine()
-	return fmt.Sprintf(consoleFormat+GetOsEol(), time.Now().Format("2006/01/02 15:04:05"), file, line, GetTraceLevelName(level), msg)
+	return fmt.Sprintf(consoleFormat+GetOsEol(), file, line, GetTraceLevelName(level), msg)
 }
 
 func buildLogMessage(level int, msg string) string {
@@ -268,7 +272,9 @@ func Trace(level int, v ...interface{}) bool {
 		go httpLog(remoteMsg)
 	}
 	if level >= logLevel {
-		logObj.lg.Output(3, GetTraceLevelName(level)+" "+msg)
+		if logObj.logfile != nil {
+			logObj.lg.Output(3, GetTraceLevelName(level)+" "+msg)
+		}
 	}
 	return true
 }
@@ -376,6 +382,9 @@ func fileMonitor() {
 }
 
 func fileCheck() {
+	if logObj.logfile == nil {
+		return
+	}
 	defer func() {
 		if err := recover(); err != nil {
 			log.Println(err)
