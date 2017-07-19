@@ -170,7 +170,7 @@ func Concat(delimiter string, input ...interface{}) string {
 }
 
 func console(msg string) {
-	if logObj.logfile == nil || consoleAppender {
+	if logObj == nil || logObj.logfile == nil || consoleAppender {
 		log.Print(msg)
 	}
 }
@@ -260,11 +260,11 @@ func Trace(level int, v ...interface{}) bool {
 		fileCheck()
 	}
 	defer catchError()
-	logObj.mu.RLock()
-	defer logObj.mu.RUnlock()
-
+	if logObj != nil {
+		logObj.mu.RLock()
+		defer logObj.mu.RUnlock()
+	}
 	msg := Concat(" ", v...)
-
 	logStr := buildConsoleMessage(level, msg)
 	console(logStr)
 	if v[0] != nil && v[0].(string) == "remote" {
@@ -272,7 +272,7 @@ func Trace(level int, v ...interface{}) bool {
 		go httpLog(remoteMsg)
 	}
 	if level >= logLevel {
-		if logObj.logfile != nil {
+		if logObj != nil && logObj.logfile != nil {
 			logObj.lg.Output(3, GetTraceLevelName(level)+" "+msg)
 		}
 	}
@@ -382,7 +382,7 @@ func fileMonitor() {
 }
 
 func fileCheck() {
-	if logObj.logfile == nil {
+	if logObj == nil || logObj.logfile == nil {
 		return
 	}
 	defer func() {

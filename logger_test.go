@@ -16,7 +16,7 @@ func TestLogger(t *testing.T) {
 	//设置远程告警地址及服务id
 	SetRemoteUrl("http://121.41.118.120:8092/api/alert/report")
 	SetRemoteServerId("8")
-	for i := 0; i < 100000; i++ {
+	for i := 0; i < 1; i++ {
 		Log("log start")
 		Debug("debug log")
 		Info("info log")
