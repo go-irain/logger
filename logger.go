@@ -135,7 +135,7 @@ func console(msg string) {
 
 func buildConsoleMessage(level int, msg string) string {
 	file, line := getTraceFileLine()
-	return fmt.Sprintf(consoleFormat+getOsEol(), file, line, getTraceLevelName(level), msg)
+	return fmt.Sprintf(logFormat+getOsEol(), time.Now().Format(TimeFormat), file, line, getTraceLevelName(level), msg)
 }
 
 func buildLogMessage(level int, msg string) string {

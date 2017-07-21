@@ -6,12 +6,11 @@ import (
 	//"time"
 )
 
-/*
 func TestLoggerDefault(t *testing.T) {
 
 	//根据配置文件设置日志等级
 
-	for i := 0; i < 100; i++ {
+	for i := 0; i < 1; i++ {
 		Log("log start")
 		Debug("debug log")
 		Info("info log")
@@ -22,8 +21,8 @@ func TestLoggerDefault(t *testing.T) {
 		Log("log log")
 	}
 }
-*/
 
+/*
 func TestLoggerRolling(t *testing.T) {
 	//SetConsole(true)
 	SetLevel(DEBUG)
@@ -40,7 +39,7 @@ func TestLoggerRolling(t *testing.T) {
 	}
 }
 
-/*
+
 func TestLoggerDaily(t *testing.T) {
 	//SetConsole(true)
 	NewDailyLogger("log", "a.log")

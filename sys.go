@@ -46,40 +46,8 @@ func getOsEol() string {
 	return "\n"
 }
 
-var curStackFlag bool
-var curStackPath string
-var curStackLine int
-
-func markCurStack() {
-	if !curStackFlag {
-		curStackFlag = true
-		_, curStackPath, curStackLine, _ = runtime.Caller(0)
-	}
-}
-
-func getCurStackPath() string {
-	if !curStackFlag {
-		markCurStack()
-	}
-	return curStackPath
-}
-
 func getStack(skip int) (pc uintptr, file string, line int, ok bool) {
 	return runtime.Caller(skip)
-}
-
-func detectStack() (string, int) {
-	curPath := getCurStackPath()
-	for skip := 0; ; skip++ {
-		_, path, line, ok := runtime.Caller(skip)
-		if path != curPath {
-			return path, line
-		}
-		if !ok {
-			break
-		}
-	}
-	return "", 0
 }
 
 func splitDirFile(path string) (string, string) {
@@ -87,7 +55,7 @@ func splitDirFile(path string) (string, string) {
 }
 
 func getTraceFileLine() (string, int) {
-	fpath, line := detectStack()
+	_, fpath, line, _ := getStack(5)
 	spath, file := splitDirFile(fpath)
 
 	if getOsFlag() == OS_WIN {
