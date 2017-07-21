@@ -11,39 +11,46 @@ import (
 	"time"
 )
 
-var remoteSockUrl string
-var remoteServierId string
+var remoteSockURL string
+var remoteServierID string
 
+//SetRemoteUrl 设置告警地址
 func SetRemoteUrl(url string) {
-	remoteSockUrl = url
+	remoteSockURL = url
 }
+
+//SetRemoteServerId 设置服务id
 func SetRemoteServerId(id string) {
-	remoteServierId = id
+	remoteServierID = id
 }
 
 //http log requester
 func httpLog(data string) {
+	if remoteSockURL == "" || remoteServierID == "" {
+		return
+	}
 	value := url.Values{}
-	value.Add("id", remoteServierId)
+	value.Add("id", remoteServierID)
 	value.Add("msg", data)
-	fmt.Println("id := ", remoteServierId, "url := ", remoteSockUrl, "data := ", data)
-	logRes, err := Post(remoteSockUrl, value.Encode())
+	//fmt.Println("id := ", remoteServierID, "url := ", remoteSockURL, "data := ", data)
+	_, err := Post(remoteSockURL, value.Encode())
 	if err != nil {
 		fmt.Println("err", err.Error())
 		return
 	}
-	fmt.Println("HttpLog Response : ", logRes)
+	//fmt.Println("HttpLog Response : ", logRes)
 }
 
+//Post http请求发送日志
 func Post(url, param string) (string, error) {
 	client := &http.Client{
 		Transport: &http.Transport{
 			Dial: func(netw, addr string) (net.Conn, error) {
-				c, err := net.DialTimeout(netw, addr, time.Second*10) //设置建立连接超时
+				c, err := net.DialTimeout(netw, addr, time.Second*5) //设置建立连接超时
 				if err != nil {
 					return nil, err
 				}
-				c.SetDeadline(time.Now().Add(30 * time.Second)) //设置发送接收数据超时
+				c.SetDeadline(time.Now().Add(10 * time.Second)) //设置发送接收数据超时
 				return c, nil
 			},
 		},

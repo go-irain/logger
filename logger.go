@@ -5,11 +5,6 @@ import (
 	"fmt"
 	"log"
 	"os"
-	"path/filepath"
-	"runtime"
-	"sort"
-	"strconv"
-	"strings"
 	"sync"
 	"time"
 )
@@ -44,122 +39,83 @@ const (
 	OS_OTHERS
 )
 
-type _FILE struct {
-	dir      string
-	filename string
-	filesize int64
-	mu       *sync.RWMutex
-	logfile  *os.File
-	lg       *log.Logger
-	_suffix  int
-	_date    *time.Time
-}
-
-var logObj *_FILE
-var logLevel int = 1
+//日志结构对象
+var logObj *LogFile
+var logLevel = 1
 var maxFileSize int64
 var maxFileCount int32
-var RollingFile bool = false
-var dailyRolling bool = true
-var consoleAppender bool = false
+var dailyFlag bool
+var consoleAppender = false
 
-const DATEFORMAT = "2006-01-02"
+const (
+	//TimeDayFormat 日期格式化到日
+	TimeDayFormat = "2006-01-02"
+	//TimeFormat 日期格式化到秒
+	TimeFormat = "2006-01-02 15:04:05"
+)
 
-var logFormat string = "%s %s"
-var consoleFormat string = "%s:%d %s %s"
+var logFormat = "%s %s:%d %s %s"
+var consoleFormat = "%s:%d %s %s"
 
+//SetConsole 设置终端是否显示
 func SetConsole(isConsole bool) {
 	consoleAppender = isConsole
 }
 
-func New() {
-	logObj = &_FILE{dir: "", filename: "", mu: new(sync.RWMutex)}
-}
-
+//SetLevel 设置日子级别
 func SetLevel(_level int) {
 	logLevel = _level
 }
 
+//NewRollingLogger 生成按文件大小及数量分割日子类
+func NewRollingLogger(fileDir, fileName string, maxNumber int32, maxSize int64, _unit UNIT) {
+	rollingLogger(fileDir, fileName, maxNumber, maxSize, _unit)
+}
+
+//SetRollingFile 生成按文件大小及数量分割日子类
 func SetRollingFile(fileDir, fileName string, maxNumber int32, maxSize int64, _unit UNIT) {
+	rollingLogger(fileDir, fileName, maxNumber, maxSize, _unit)
+}
+
+func rollingLogger(fileDir, fileName string, maxNumber int32, maxSize int64, _unit UNIT) {
 	maxFileCount = maxNumber
 	maxFileSize = maxSize * int64(_unit)
-	RollingFile = true
-	dailyRolling = false
-	logObj = &_FILE{dir: fileDir, filename: fileName, mu: new(sync.RWMutex)}
+	dailyFlag = false
+	logObj = &LogFile{dir: fileDir, filename: fileName, mu: new(sync.RWMutex)}
 	logObj.mu.Lock()
 	defer logObj.mu.Unlock()
-	for i := 1; i <= int(maxNumber); i++ {
-		if isExist(fileDir + "/" + fileName + "." + strconv.Itoa(i)) {
-			logObj._suffix = i
-		} else {
-			break
+
+	if !logObj.isMustRename() {
+		logObj.logfile, _ = os.OpenFile(fileDir+"/"+fileName, os.O_RDWR|os.O_APPEND|os.O_CREATE, 0777)
+	} else {
+		logObj.rename()
+	}
+}
+
+//NewDailyLogger new按日期分割日子类
+func NewDailyLogger(fileDir, filename string) {
+	dailyLogger(fileDir, filename)
+}
+
+func dailyLogger(fileDir, fileName string) {
+	dailyFlag = true
+	t, _ := time.Parse(TimeDayFormat, time.Now().Format(TimeDayFormat))
+	logObj = &LogFile{dir: fileDir, filename: fileName, _date: &t, mu: new(sync.RWMutex)}
+	logObj.mu.Lock()
+	defer logObj.mu.Unlock()
+
+	if !logObj.isMustRename() {
+		var err error
+		logObj.logfile, err = os.OpenFile(fileDir+"/"+fileName, os.O_RDWR|os.O_APPEND|os.O_CREATE, 0777)
+		if err != nil {
+			fmt.Println("**** 111 ", err.Error)
 		}
-	}
-	if !logObj.isMustRename() {
-		logObj.logfile, _ = os.OpenFile(fileDir+"/"+fileName, os.O_RDWR|os.O_APPEND|os.O_CREATE, 0777)
-		logObj.lg = log.New(logObj.logfile, "", log.Ldate|log.Ltime|log.Lshortfile)
-	} else {
-		logObj.rename()
-	}
-	go fileMonitor()
-}
-
-func SetRollingDaily(fileDir, fileName string) {
-	RollingFile = false
-	dailyRolling = true
-	t, _ := time.Parse(DATEFORMAT, time.Now().Format(DATEFORMAT))
-	logObj = &_FILE{dir: fileDir, filename: fileName, _date: &t, mu: new(sync.RWMutex)}
-	logObj.mu.Lock()
-	defer logObj.mu.Unlock()
-
-	if !logObj.isMustRename() {
-		logObj.logfile, _ = os.OpenFile(fileDir+"/"+fileName, os.O_RDWR|os.O_APPEND|os.O_CREATE, 0777)
-		logObj.lg = log.New(logObj.logfile, "\n", log.Ldate|log.Ltime|log.Lshortfile)
 	} else {
 		logObj.rename()
 	}
 }
 
-func GetTraceLevelName(level int) string {
-	switch level {
-	case LOG:
-		return "LOG"
-	case DEBUG:
-		return "DEBUG"
-	case INFO:
-		return "INFO"
-	case WARN:
-		return "WARN"
-	case ERROR:
-		return "ERROR"
-	case FATAL:
-		return "FATAL"
-	default:
-		return "UNKNOWN"
-	}
-}
-
-func GetOsFlag() int {
-	switch os := runtime.GOOS; os {
-	case "darwin":
-		return OS_X
-	case "linux":
-		return OS_LINUX
-	case "windows":
-		return OS_WIN
-	default:
-		return OS_OTHERS
-	}
-}
-
-func GetOsEol() string {
-	if GetOsFlag() == OS_WIN {
-		return "\r\n"
-	}
-	return "\n"
-}
-
-func Concat(delimiter string, input ...interface{}) string {
+func concat(delimiter string, input ...interface{}) string {
 	buffer := bytes.Buffer{}
 	l := len(input)
 	for i := 0; i < l; i++ {
@@ -177,78 +133,14 @@ func console(msg string) {
 	}
 }
 
-var curStackFlag bool = false
-var curStackPath string
-var curStackLine int
-
-func markCurStack() {
-	if !curStackFlag {
-		curStackFlag = true
-		_, curStackPath, curStackLine, _ = runtime.Caller(0)
-	}
-}
-
-func getCurStackPath() string {
-	if !curStackFlag {
-		markCurStack()
-	}
-	return curStackPath
-}
-
-func getStack(skip int) (pc uintptr, file string, line int, ok bool) {
-	return runtime.Caller(skip)
-}
-
-func detectStack() (string, int) {
-	curPath := getCurStackPath()
-	for skip := 0; ; skip++ {
-		_, path, line, ok := runtime.Caller(skip)
-		if path != curPath {
-			return path, line
-		}
-		if !ok {
-			break
-		}
-	}
-	return "", 0
-}
-
-func splitDirFile(path string) (string, string) {
-	return filepath.Dir(path), filepath.Base(path)
-}
-
-func getTraceDirInfo(dir string) string {
-	if GetOsFlag() == OS_WIN {
-		split := strings.Split(dir, "\\")
-		if len(split) > 2 {
-			return split[0] + "\\" + split[1] + "\\...\\" + split[len(split)-1] + "\\"
-		} else {
-			return dir + "\\"
-		}
-	} else {
-		split := strings.Split(dir, "/")
-		if len(split) > 2 {
-			return split[0] + "/.../" + split[len(split)-1]
-		} else {
-			return dir + "/"
-		}
-	}
-}
-
-func getTraceFileLine() (string, int) {
-	path, line := detectStack()
-	dir, file := splitDirFile(path)
-	dir = getTraceDirInfo(dir)
-	return file, line
-}
-
 func buildConsoleMessage(level int, msg string) string {
 	file, line := getTraceFileLine()
-	return fmt.Sprintf(consoleFormat+GetOsEol(), file, line, GetTraceLevelName(level), msg)
+	return fmt.Sprintf(consoleFormat+getOsEol(), file, line, getTraceLevelName(level), msg)
 }
 
 func buildLogMessage(level int, msg string) string {
-	return fmt.Sprintf(logFormat+GetOsEol(), GetTraceLevelName(level), msg)
+	file, line := getTraceFileLine()
+	return fmt.Sprintf(logFormat+getOsEol(), time.Now().Format(TimeFormat), file, line, getTraceLevelName(level), msg)
 }
 
 func catchError() {
@@ -257,183 +149,59 @@ func catchError() {
 	}
 }
 
+//Trace write
 func Trace(level int, v ...interface{}) bool {
-	if dailyRolling {
-		fileCheck()
-	}
 	defer catchError()
 	if logObj != nil {
 		logObj.mu.RLock()
 		defer logObj.mu.RUnlock()
 	}
-	msg := Concat(" ", v...)
+	msg := concat(" ", v...)
 	logStr := buildConsoleMessage(level, msg)
 	console(logStr)
 	if v[0] != nil && v[0].(string) == "remote" {
-		remoteMsg := Concat(" ", v[1:]...)
+		remoteMsg := concat(" ", v[1:]...)
 		go httpLog(remoteMsg)
 	}
 	if level >= logLevel {
 		if logObj != nil && logObj.logfile != nil {
-			logObj.lg.Output(3, GetTraceLevelName(level)+" "+msg)
+			logMsg := buildLogMessage(level, msg)
+			_, err := logObj.write([]byte(logMsg))
+			if err != nil {
+				fmt.Println(err.Error())
+				return false
+			}
 		}
 	}
 	return true
 }
 
+//Log LOG
 func Log(v ...interface{}) bool {
 	return Trace(LOG, v...)
 }
 
+//Debug DEBUG
 func Debug(v ...interface{}) bool {
 	return Trace(DEBUG, v...)
 }
 
+//Info INFO
 func Info(v ...interface{}) bool {
 	return Trace(INFO, v...)
 }
 
+//Warn WARN
 func Warn(v ...interface{}) bool {
 	return Trace(WARN, v...)
 }
 
+//Error ERROR
 func Error(v ...interface{}) bool {
 	return Trace(ERROR, v...)
 }
 
+//Fatal FATAL
 func Fatal(v ...interface{}) bool {
 	return Trace(FATAL, v...)
-}
-
-func (f *_FILE) isMustRename() bool {
-	if dailyRolling {
-		t, _ := time.Parse(DATEFORMAT, time.Now().Format(DATEFORMAT))
-		if t.After(*f._date) {
-			return true
-		}
-	} else {
-		if maxFileCount > 1 {
-			if fileSize(f.dir+"/"+f.filename) >= maxFileSize {
-				return true
-			}
-		}
-	}
-	return false
-}
-
-func (f *_FILE) rename() {
-	if dailyRolling {
-		fn := f.dir + "/" + f.filename + "." + f._date.Format(DATEFORMAT)
-		if !isExist(fn) && f.isMustRename() {
-			if f.logfile != nil {
-				f.logfile.Close()
-			}
-			err := os.Rename(f.dir+"/"+f.filename, fn)
-			if err != nil {
-				f.lg.Println("rename err", err.Error())
-			}
-			t, _ := time.Parse(DATEFORMAT, time.Now().Format(DATEFORMAT))
-			f._date = &t
-			f.logfile, _ = os.Create(f.dir + "/" + f.filename)
-			f.lg = log.New(logObj.logfile, "\n", log.Ldate|log.Ltime|log.Lshortfile)
-		}
-	} else {
-		f.coverNextOne()
-	}
-}
-
-func (f *_FILE) nextSuffix() int {
-	return int(f._suffix%int(maxFileCount) + 1)
-}
-
-func (f *_FILE) coverNextOne() {
-	f._suffix = f.nextSuffix()
-	if f.logfile != nil {
-		f.logfile.Close()
-	}
-	if isExist(f.dir + "/" + f.filename + "." + strconv.Itoa(int(f._suffix))) {
-		os.Remove(f.dir + "/" + f.filename + "." + strconv.Itoa(int(f._suffix)))
-	}
-	os.Rename(f.dir+"/"+f.filename, f.dir+"/"+f.filename+"."+strconv.Itoa(int(f._suffix)))
-	f.logfile, _ = os.Create(f.dir + "/" + f.filename)
-	f.lg = log.New(logObj.logfile, "\n", log.Ldate|log.Ltime|log.Lshortfile)
-}
-
-func fileSize(file string) int64 {
-	f, e := os.Stat(file)
-	if e != nil {
-		fmt.Println(e.Error())
-		return 0
-	}
-	return f.Size()
-}
-
-func isExist(path string) bool {
-	_, err := os.Stat(path)
-	return err == nil || os.IsExist(err)
-}
-
-func fileMonitor() {
-	timer := time.NewTicker(1 * time.Second)
-	for {
-		select {
-		case <-timer.C:
-			fileCheck()
-		}
-	}
-}
-
-func fileCheck() {
-	if logObj == nil || logObj.logfile == nil {
-		return
-	}
-	defer func() {
-		if err := recover(); err != nil {
-			log.Println(err)
-		}
-	}()
-	if logObj != nil && logObj.isMustRename() {
-		logObj.mu.Lock()
-		defer logObj.mu.Unlock()
-		logObj.rename()
-	}
-}
-
-// 获取目录下指定前缀的所有日志文件
-func removeFiles() {
-	fs, err := filepath.Glob(fmt.Sprintf("%s/%s.log.*", logObj.dir, logObj.filename))
-	if err != nil {
-		return
-	}
-	sort.Strings(fs)
-	x := len(fs) - (int(maxFileCount) - 1)
-	if maxFileCount > 0 && x > 0 {
-		dels := fs[:x]
-		for _, v := range dels {
-			os.Remove(v)
-		}
-	}
-}
-
-// 分割
-func rotate() error {
-	removeFiles()
-	if logObj != nil && logObj.logfile != nil {
-		logObj.logfile.Sync()
-		logObj.logfile.Close()
-		os.Rename(logObj.filename, logObj.filename+time.Now().Format(".20060102150405"))
-	}
-	fmt.Println("log rotate")
-	// 创建最新的日志文件
-	fd, err := os.OpenFile(logObj.filename, os.O_WRONLY|os.O_APPEND|os.O_CREATE, 0666)
-	if err != nil {
-		return err
-	}
-	fi, err := fd.Stat()
-	if err != nil {
-		return err
-	}
-	logObj.logfile = fd
-	logObj.filesize = fi.Size()
-	return nil
 }

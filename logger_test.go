@@ -1,28 +1,59 @@
 package logger
 
 import (
-	"fmt"
+	//"fmt"
 	"testing"
+	//"time"
 )
 
-func TestLogger(t *testing.T) {
-	SetConsole(false)
+/*
+func TestLoggerDefault(t *testing.T) {
+
 	//根据配置文件设置日志等级
 
-	SetLevel(DEBUG)
-	fmt.Println(INFO)
-	//根据配置文件，设置日志路径，日志名，日志切割大小限制
-	SetRollingFile("log", "a.log", 10, 1, MB)
-	//设置远程告警地址及服务id
-	SetRemoteUrl("http://121.41.118.120:8092/api/alert/report")
-	SetRemoteServerId("8")
-	for i := 0; i < 1; i++ {
+	for i := 0; i < 100; i++ {
 		Log("log start")
 		Debug("debug log")
 		Info("info log")
 		Warn("warn log")
 		Error("error log")
 		Fatal("fatal log")
-		Info("remote", "你好")
+		Info("remote", " log")
+		Log("log log")
 	}
 }
+*/
+
+func TestLoggerRolling(t *testing.T) {
+	//SetConsole(true)
+	SetLevel(DEBUG)
+	//根据配置文件，设置日志路径，日志名，日志切割大小限制
+	NewRollingLogger("log", "a.log", 15, 1, KB)
+	for i := 0; i < 1000; i++ {
+		Log("rolling ", "log start")
+		Debug("rolling ", "debug log")
+		Info("rolling ", "info log")
+		Warn("rolling ", "warn log")
+		Error("rolling ", "error log")
+		Fatal("rolling ", "fatal log")
+		Log("rolling ", "fatal log")
+	}
+}
+
+/*
+func TestLoggerDaily(t *testing.T) {
+	//SetConsole(true)
+	NewDailyLogger("log", "a.log")
+	//根据配置文件，设置日志路径，日志名，日志切割大小限制
+	for i := 0; i < 100000000; i++ {
+		Log("daily ", "log start")
+		Debug("daily ", "debug log")
+		Info("daily ", "info log")
+		Warn("daily ", "warn log")
+		Error("daily ", "error log")
+		Fatal("daily ", "fatal log")
+		Log("daily ", "log log")
+		time.Sleep(time.Microsecond * 100)
+	}
+}
+*/
