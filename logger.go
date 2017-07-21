@@ -7,6 +7,7 @@ import (
 	"os"
 	"path/filepath"
 	"runtime"
+	"sort"
 	"strconv"
 	"strings"
 	"sync"
@@ -46,6 +47,7 @@ const (
 type _FILE struct {
 	dir      string
 	filename string
+	filesize int64
 	mu       *sync.RWMutex
 	logfile  *os.File
 	lg       *log.Logger
@@ -395,4 +397,43 @@ func fileCheck() {
 		defer logObj.mu.Unlock()
 		logObj.rename()
 	}
+}
+
+// 获取目录下指定前缀的所有日志文件
+func removeFiles() {
+	fs, err := filepath.Glob(fmt.Sprintf("%s/%s.log.*", logObj.dir, logObj.filename))
+	if err != nil {
+		return
+	}
+	sort.Strings(fs)
+	x := len(fs) - (int(maxFileCount) - 1)
+	if maxFileCount > 0 && x > 0 {
+		dels := fs[:x]
+		for _, v := range dels {
+			os.Remove(v)
+		}
+	}
+}
+
+// 分割
+func rotate() error {
+	removeFiles()
+	if logObj != nil && logObj.logfile != nil {
+		logObj.logfile.Sync()
+		logObj.logfile.Close()
+		os.Rename(logObj.filename, logObj.filename+time.Now().Format(".20060102150405"))
+	}
+	fmt.Println("log rotate")
+	// 创建最新的日志文件
+	fd, err := os.OpenFile(logObj.filename, os.O_WRONLY|os.O_APPEND|os.O_CREATE, 0666)
+	if err != nil {
+		return err
+	}
+	fi, err := fd.Stat()
+	if err != nil {
+		return err
+	}
+	logObj.logfile = fd
+	logObj.filesize = fi.Size()
+	return nil
 }
