@@ -22,7 +22,6 @@ func TestLoggerDefault(t *testing.T) {
 	}
 }
 
-/*
 func TestLoggerRolling(t *testing.T) {
 	//SetConsole(true)
 	SetLevel(DEBUG)
@@ -39,7 +38,7 @@ func TestLoggerRolling(t *testing.T) {
 	}
 }
 
-
+/*
 func TestLoggerDaily(t *testing.T) {
 	//SetConsole(true)
 	NewDailyLogger("log", "a.log")

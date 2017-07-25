@@ -110,6 +110,12 @@ func dailyLogger(fileDir, fileName string) {
 		if err != nil {
 			fmt.Println("**** 111 ", err.Error)
 		}
+		fi, err := logObj.logfile.Stat()
+		if err != nil {
+			fmt.Println("aaaaaa")
+			return
+		}
+		logObj.filesize = fi.Size()
 	} else {
 		logObj.rename()
 	}
