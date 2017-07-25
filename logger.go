@@ -87,6 +87,12 @@ func rollingLogger(fileDir, fileName string, maxNumber int32, maxSize int64, _un
 
 	if !logObj.isMustRename() {
 		logObj.logfile, _ = os.OpenFile(fileDir+"/"+fileName, os.O_RDWR|os.O_APPEND|os.O_CREATE, 0777)
+		fi, err := logObj.logfile.Stat()
+		if err != nil {
+			fmt.Println(err.Error())
+			return
+		}
+		logObj.filesize = fi.Size()
 	} else {
 		logObj.rename()
 	}
@@ -110,12 +116,6 @@ func dailyLogger(fileDir, fileName string) {
 		if err != nil {
 			fmt.Println("**** 111 ", err.Error)
 		}
-		fi, err := logObj.logfile.Stat()
-		if err != nil {
-			fmt.Println("aaaaaa")
-			return
-		}
-		logObj.filesize = fi.Size()
 	} else {
 		logObj.rename()
 	}

@@ -26,8 +26,8 @@ func TestLoggerRolling(t *testing.T) {
 	//SetConsole(true)
 	SetLevel(DEBUG)
 	//根据配置文件，设置日志路径，日志名，日志切割大小限制
-	NewRollingLogger("log", "a.log", 15, 1, KB)
-	for i := 0; i < 1000; i++ {
+	NewRollingLogger("log", "a.log", 5, 1, KB)
+	for i := 0; i < 1; i++ {
 		Log("rolling ", "log start")
 		Debug("rolling ", "debug log")
 		Info("rolling ", "info log")
