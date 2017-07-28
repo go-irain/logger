@@ -85,17 +85,13 @@ func rollingLogger(fileDir, fileName string, maxNumber int32, maxSize int64, _un
 	logObj.mu.Lock()
 	defer logObj.mu.Unlock()
 
-	if !logObj.isMustRename() {
-		logObj.logfile, _ = os.OpenFile(fileDir+"/"+fileName, os.O_RDWR|os.O_APPEND|os.O_CREATE, 0777)
-		fi, err := logObj.logfile.Stat()
-		if err != nil {
-			fmt.Println(err.Error())
-			return
-		}
-		logObj.filesize = fi.Size()
-	} else {
-		logObj.rename()
+	logObj.logfile, _ = os.OpenFile(fileDir+"/"+fileName, os.O_RDWR|os.O_APPEND|os.O_CREATE, 0777)
+	fi, err := logObj.logfile.Stat()
+	if err != nil {
+		fmt.Println(err.Error())
+		return
 	}
+	logObj.filesize = fi.Size()
 }
 
 //NewDailyLogger new按日期分割日子类
