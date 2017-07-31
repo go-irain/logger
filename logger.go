@@ -81,14 +81,14 @@ func rollingLogger(fileDir, fileName string, maxNumber int32, maxSize int64, _un
 	maxFileCount = maxNumber
 	maxFileSize = maxSize * int64(_unit)
 	dailyFlag = false
-	logObj = &LogFile{dir: fileDir, filename: fileName, mu: new(sync.RWMutex)}
+	logObj = &LogFile{dir: fileDir, filename: fileName, mu: new(sync.Mutex)}
 	logObj.mu.Lock()
 	defer logObj.mu.Unlock()
 
 	logObj.logfile, _ = os.OpenFile(fileDir+"/"+fileName, os.O_RDWR|os.O_APPEND|os.O_CREATE, 0777)
 	fi, err := logObj.logfile.Stat()
 	if err != nil {
-		fmt.Println(err.Error())
+		fmt.Println("222", err.Error())
 		return
 	}
 	logObj.filesize = fi.Size()
@@ -102,7 +102,7 @@ func NewDailyLogger(fileDir, filename string) {
 func dailyLogger(fileDir, fileName string) {
 	dailyFlag = true
 	t, _ := time.Parse(TimeDayFormat, time.Now().Format(TimeDayFormat))
-	logObj = &LogFile{dir: fileDir, filename: fileName, _date: &t, mu: new(sync.RWMutex)}
+	logObj = &LogFile{dir: fileDir, filename: fileName, _date: &t, mu: new(sync.Mutex)}
 	logObj.mu.Lock()
 	defer logObj.mu.Unlock()
 
@@ -155,8 +155,8 @@ func catchError() {
 func Trace(level int, v ...interface{}) bool {
 	defer catchError()
 	if logObj != nil {
-		logObj.mu.RLock()
-		defer logObj.mu.RUnlock()
+		logObj.mu.Lock()
+		defer logObj.mu.Unlock()
 	}
 	msg := concat(" ", v...)
 	logStr := buildConsoleMessage(level, msg)
@@ -166,11 +166,11 @@ func Trace(level int, v ...interface{}) bool {
 		go httpLog(remoteMsg)
 	}
 	if level >= logLevel {
-		if logObj != nil && logObj.logfile != nil {
+		if logObj != nil {
 			logMsg := buildLogMessage(level, msg)
 			_, err := logObj.write([]byte(logMsg))
 			if err != nil {
-				fmt.Println(err.Error())
+				fmt.Println("444", err.Error())
 				return false
 			}
 		}

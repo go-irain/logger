@@ -3,7 +3,7 @@ package logger
 import (
 	//"fmt"
 	"testing"
-	//"time"
+	"time"
 )
 
 func TestLoggerDefault(t *testing.T) {
@@ -23,19 +23,24 @@ func TestLoggerDefault(t *testing.T) {
 }
 
 func TestLoggerRolling(t *testing.T) {
-	//SetConsole(true)
+	SetConsole(true)
 	SetLevel(DEBUG)
 	//根据配置文件，设置日志路径，日志名，日志切割大小限制
-	NewRollingLogger("log", "a.log", 5, 1, KB)
-	for i := 0; i < 1000; i++ {
-		Log("rolling ", "log start")
-		Debug("rolling ", "debug log")
-		Info("rolling ", "info log")
-		Warn("rolling ", "warn log")
-		Error("rolling ", "error log")
-		Fatal("rolling ", "fatal log")
-		Log("rolling ", "fatal log")
+	NewRollingLogger("log", "a.log", 10, 1, MB)
+	for i := 0; i < 100000; i++ {
+		time.Sleep(1 * time.Millisecond)
+		go func() {
+			Log("rolling ", "log start")
+			Debug("rolling ", "debug log")
+			Info("rolling ", "info log")
+			Warn("rolling ", "warn log")
+			Error("rolling ", "error log")
+			Fatal("rolling ", "fatal log")
+			Log("rolling ", "fatal log")
+		}()
+
 	}
+	time.Sleep(30 * time.Second)
 }
 
 /*

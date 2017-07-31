@@ -14,7 +14,7 @@ type LogFile struct {
 	dir      string
 	filename string
 	filesize int64
-	mu       *sync.RWMutex
+	mu       *sync.Mutex
 	logfile  *os.File
 	_suffix  int
 	_date    *time.Time
@@ -53,7 +53,7 @@ func (f *LogFile) rename() {
 		if maxFileSize > 0 && f.filesize > maxFileSize {
 			err := f.rotate()
 			if err != nil {
-				fmt.Println(err.Error())
+				fmt.Println("333", err.Error())
 			}
 		}
 	}
@@ -62,6 +62,7 @@ func (f *LogFile) rename() {
 func (f *LogFile) write(data []byte) (int, error) {
 	n, err := f.logfile.Write(data)
 	if err != nil {
+		fmt.Println("11111", err.Error())
 		return n, err
 	}
 	f.filesize += int64(n)
