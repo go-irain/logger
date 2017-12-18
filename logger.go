@@ -2,9 +2,11 @@ package logger
 
 import (
 	"bytes"
+	"encoding/json"
 	"fmt"
 	"log"
 	"os"
+	"strconv"
 	"sync"
 	"time"
 )
@@ -55,6 +57,7 @@ const (
 )
 
 var logFormat = "%s %s:%d %s %s"
+var logObjFormat = "%s %s:%d %s %s %s %s"
 var consoleFormat = "%s:%d %s %s"
 
 //SetConsole 设置终端是否显示
@@ -67,8 +70,8 @@ func SetLevel(_level int) {
 	logLevel = _level
 }
 
-//NewRollingLogger 生成按文件大小及数量分割日子类
-func NewRollingLogger(fileDir, fileName string, maxNumber int32, maxSize int64, _unit UNIT) {
+//RollingLogger 生成按文件大小及数量分割日子类
+func RollingLogger(fileDir, fileName string, maxNumber int32, maxSize int64, _unit UNIT) {
 	rollingLogger(fileDir, fileName, maxNumber, maxSize, _unit)
 }
 
@@ -88,14 +91,14 @@ func rollingLogger(fileDir, fileName string, maxNumber int32, maxSize int64, _un
 	logObj.logfile, _ = os.OpenFile(fileDir+"/"+fileName, os.O_RDWR|os.O_APPEND|os.O_CREATE, 0777)
 	fi, err := logObj.logfile.Stat()
 	if err != nil {
-		fmt.Println("222", err.Error())
+		log.Println(err.Error())
 		return
 	}
 	logObj.filesize = fi.Size()
 }
 
-//NewDailyLogger new按日期分割日子类
-func NewDailyLogger(fileDir, filename string) {
+//DailyLogger new按日期分割日子类
+func DailyLogger(fileDir, filename string) {
 	dailyLogger(fileDir, filename)
 }
 
@@ -110,7 +113,7 @@ func dailyLogger(fileDir, fileName string) {
 		var err error
 		logObj.logfile, err = os.OpenFile(fileDir+"/"+fileName, os.O_RDWR|os.O_APPEND|os.O_CREATE, 0777)
 		if err != nil {
-			fmt.Println("**** 111 ", err.Error)
+			log.Println(err.Error())
 		}
 	} else {
 		logObj.rename()
@@ -135,14 +138,32 @@ func console(msg string) {
 	}
 }
 
-func buildConsoleMessage(level int, msg string) string {
+func buildJSONMessage(level int, l *LogObj, msg string) string {
 	file, line := getTraceFileLine()
-	return fmt.Sprintf(logFormat+getOsEol(), time.Now().Format(TimeFormat), file, line, getTraceLevelName(level), msg)
+	logInfo := map[string]interface{}{"atime": time.Now().Format(TimeFormat), "bfile": file + " " + strconv.Itoa(line), "clevel": getTraceLevelName(level)}
+
+	if l != nil {
+		logInfo["dlogid"] = l.logid
+		logInfo["etag"] = l.tag
+	}
+	logInfo["msg"] = msg
+	resb, err := json.Marshal(logInfo)
+	if err != nil {
+		log.Println(err.Error())
+		return ""
+	}
+	return string(resb) + getOsEol()
 }
 
-func buildLogMessage(level int, msg string) string {
+func buildLogMessage(level int, l *LogObj, msg string) string {
 	file, line := getTraceFileLine()
-	return fmt.Sprintf(logFormat+getOsEol(), time.Now().Format(TimeFormat), file, line, getTraceLevelName(level), msg)
+	logInfo := ""
+	if l == nil {
+		logInfo = fmt.Sprintf(logFormat+getOsEol(), time.Now().Format(TimeFormat), file, line, getTraceLevelName(level), msg)
+	} else {
+		logInfo = fmt.Sprintf(logObjFormat+getOsEol(), time.Now().Format(TimeFormat), file, line, l.logid, l.tag, getTraceLevelName(level), msg)
+	}
+	return logInfo
 }
 
 func catchError() {
@@ -152,14 +173,19 @@ func catchError() {
 }
 
 //Trace write
-func Trace(level int, v ...interface{}) bool {
+func Trace(level int, l *LogObj, v ...interface{}) bool {
 	defer catchError()
 	if logObj != nil {
 		logObj.mu.Lock()
 		defer logObj.mu.Unlock()
 	}
 	msg := concat(" ", v...)
-	logStr := buildConsoleMessage(level, msg)
+	logStr := ""
+	if l.json {
+		logStr = buildJSONMessage(level, l, msg)
+	} else {
+		logStr = buildLogMessage(level, l, msg)
+	}
 	console(logStr)
 	if v[0] != nil && v[0].(string) == "remote" {
 		remoteMsg := concat(" ", v[1:]...)
@@ -167,10 +193,9 @@ func Trace(level int, v ...interface{}) bool {
 	}
 	if level >= logLevel {
 		if logObj != nil {
-			logMsg := buildLogMessage(level, msg)
-			_, err := logObj.write([]byte(logMsg))
+			_, err := logObj.write([]byte(logStr))
 			if err != nil {
-				fmt.Println("444", err.Error())
+				log.Println(err.Error())
 				return false
 			}
 		}
@@ -180,30 +205,30 @@ func Trace(level int, v ...interface{}) bool {
 
 //Log LOG
 func Log(v ...interface{}) bool {
-	return Trace(LOG, v...)
+	return Trace(LOG, nil, v...)
 }
 
 //Debug DEBUG
 func Debug(v ...interface{}) bool {
-	return Trace(DEBUG, v...)
+	return Trace(DEBUG, nil, v...)
 }
 
 //Info INFO
 func Info(v ...interface{}) bool {
-	return Trace(INFO, v...)
+	return Trace(INFO, nil, v...)
 }
 
 //Warn WARN
 func Warn(v ...interface{}) bool {
-	return Trace(WARN, v...)
+	return Trace(WARN, nil, v...)
 }
 
 //Error ERROR
 func Error(v ...interface{}) bool {
-	return Trace(ERROR, v...)
+	return Trace(ERROR, nil, v...)
 }
 
 //Fatal FATAL
 func Fatal(v ...interface{}) bool {
-	return Trace(FATAL, v...)
+	return Trace(FATAL, nil, v...)
 }
