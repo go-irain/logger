@@ -181,7 +181,7 @@ func Trace(level int, l *LogObj, v ...interface{}) bool {
 	}
 	msg := concat(" ", v...)
 	logStr := ""
-	if l.json {
+	if l != nil && l.json {
 		logStr = buildJSONMessage(level, l, msg)
 	} else {
 		logStr = buildLogMessage(level, l, msg)
