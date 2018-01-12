@@ -62,7 +62,6 @@ func (f *LogFile) rename() {
 func (f *LogFile) write(data []byte) (int, error) {
 	n, err := f.logfile.Write(data)
 	if err != nil {
-		fmt.Println("11111", err.Error())
 		return n, err
 	}
 	f.filesize += int64(n)
