@@ -187,9 +187,12 @@ func Trace(level int, l *LogObj, v ...interface{}) bool {
 		logStr = buildLogMessage(level, l, msg)
 	}
 	console(logStr)
-	if v[0] != nil && v[0].(string) == "remote" {
-		remoteMsg := concat(" ", v[1:]...)
-		go httpLog(remoteMsg)
+
+	if v[0] != nil {
+		if remote, ok := v[0].(string); ok && remote == "remote" {
+			remoteMsg := concat(" ", v[1:]...)
+			go httpLog(remoteMsg)
+		}
 	}
 	if level >= logLevel {
 		if logObj != nil {
