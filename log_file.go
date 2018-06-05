@@ -16,6 +16,7 @@ type LogFile struct {
 	filesize int64
 	mu       *sync.Mutex
 	logfile  *os.File
+	json     bool
 	_suffix  int
 	_date    *time.Time
 }
@@ -110,4 +111,18 @@ func (f *LogFile) rotate() error {
 func (f *LogFile) isExist(path string) bool {
 	_, err := os.Stat(path)
 	return err == nil || os.IsExist(err)
+}
+
+//SetJSON 设置json格式
+func (f *LogFile) SetJSON() {
+	if f != nil {
+		f.json = true
+	}
+}
+
+//UnSetJSON 取消json格式
+func (f *LogFile) UnSetJSON() {
+	if f != nil {
+		f.json = false
+	}
 }

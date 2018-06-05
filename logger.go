@@ -172,6 +172,15 @@ func catchError() {
 	}
 }
 
+//JSON 设置日志格式
+func JSON(js bool) {
+	if js {
+		logObj.SetJSON()
+	} else {
+		logObj.UnSetJSON()
+	}
+}
+
 //Trace write
 func Trace(level int, l *LogObj, v ...interface{}) bool {
 	defer catchError()
@@ -181,7 +190,7 @@ func Trace(level int, l *LogObj, v ...interface{}) bool {
 	}
 	msg := concat(" ", v...)
 	logStr := ""
-	if l != nil && l.json {
+	if (l != nil && l.json) || logObj.json {
 		logStr = buildJSONMessage(level, l, msg)
 	} else {
 		logStr = buildLogMessage(level, l, msg)
