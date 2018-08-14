@@ -9,6 +9,8 @@ import (
 	"strconv"
 	"sync"
 	"time"
+
+	"github.com/go-xorm/core"
 )
 
 const (
@@ -41,6 +43,10 @@ const (
 	OS_OTHERS
 )
 
+type LogHandle struct {
+	Handle int
+}
+
 //日志结构对象
 var logObj *LogFile
 var logLevel = 1
@@ -48,12 +54,16 @@ var maxFileSize int64
 var maxFileCount int32
 var dailyFlag bool
 var consoleAppender = false
+var showType = true
+var level core.LogLevel
+var handle LogHandle
 
 const (
 	//TimeDayFormat 日期格式化到日
 	TimeDayFormat = "2006-01-02"
 	//TimeFormat 日期格式化到秒
 	TimeFormat = "2006-01-02 15:04:05"
+	//TimeFormat = "2006-01-02T15:04:05.999999-07:00"
 )
 
 var logFormat = "%s %s:%d %s %s"
@@ -64,10 +74,83 @@ var consoleFormat = "%s:%d %s %s"
 func SetConsole(isConsole bool) {
 	consoleAppender = isConsole
 }
+func GetLogHandle() LogHandle {
+	return handle
+}
+
+func (handle LogHandle) SetLevel(le core.LogLevel) {
+	level = le
+}
+
+func (handle LogHandle) Level() core.LogLevel {
+	return level
+}
+
+func (handle LogHandle) IsShowSQL() bool {
+	return IsShowSQL()
+}
+
+func (handle LogHandle) ShowSQL(show ...bool) {
+	if len(show) != 0 {
+		ShowSQL(show[0])
+	} else {
+		ShowSQL(true)
+	}
+}
+
+//Debug DEBUG
+func (handle LogHandle) Debug(v ...interface{}) {
+	Trace(DEBUG, nil, v...)
+}
+
+//Debug DEBUG
+func (handle LogHandle) Debugf(format string, v ...interface{}) {
+	Trace(DEBUG, nil, v...)
+}
+
+//Info INFO
+func (handle LogHandle) Info(v ...interface{}) {
+	Trace(INFO, nil, v...)
+}
+
+//Info INFO
+func (handle LogHandle) Infof(format string, v ...interface{}) {
+	Trace(INFO, nil, v...)
+}
+
+//Warn WARN
+func (handle LogHandle) Warn(v ...interface{}) {
+	Trace(WARN, nil, v...)
+}
+
+//Warn WARN
+func (handle LogHandle) Warnf(format string, v ...interface{}) {
+	Trace(WARN, nil, v...)
+}
+
+//Error ERROR
+func (handle LogHandle) Error(v ...interface{}) {
+	Trace(ERROR, nil, v...)
+}
+
+//Error ERROR
+func (handle LogHandle) Errorf(format string, v ...interface{}) {
+	Trace(ERROR, nil, v...)
+}
 
 //SetLevel 设置日子级别
 func SetLevel(_level int) {
 	logLevel = _level
+}
+
+//ShowSQL 设置是否打印SQL
+func IsShowSQL() bool {
+	return showType
+}
+
+//ShowSQL 设置是否打印SQL
+func ShowSQL(show bool) {
+	showType = show
 }
 
 //RollingLogger 生成按文件大小及数量分割日子类
@@ -172,15 +255,6 @@ func catchError() {
 	}
 }
 
-//JSON 设置日志格式
-func JSON(js bool) {
-	if js {
-		logObj.SetJSON()
-	} else {
-		logObj.UnSetJSON()
-	}
-}
-
 //Trace write
 func Trace(level int, l *LogObj, v ...interface{}) bool {
 	defer catchError()
@@ -190,7 +264,7 @@ func Trace(level int, l *LogObj, v ...interface{}) bool {
 	}
 	msg := concat(" ", v...)
 	logStr := ""
-	if logObj.json || (l != nil && l.json) {
+	if l != nil && l.json {
 		logStr = buildJSONMessage(level, l, msg)
 	} else {
 		logStr = buildLogMessage(level, l, msg)
