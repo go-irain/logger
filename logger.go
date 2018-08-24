@@ -190,13 +190,12 @@ func Trace(level int, l *LogObj, v ...interface{}) bool {
 	}
 	msg := concat(" ", v...)
 	logStr := ""
-	if logObj.json || (l != nil && l.json) {
+	if (logObj != nil && logObj.json) || (l != nil && l.json) {
 		logStr = buildJSONMessage(level, l, msg)
 	} else {
 		logStr = buildLogMessage(level, l, msg)
 	}
 	console(logStr)
-
 	if v[0] != nil {
 		if remote, ok := v[0].(string); ok && remote == "remote" {
 			remoteMsg := concat(" ", v[1:]...)
