@@ -48,6 +48,7 @@ var maxFileSize int64
 var maxFileCount int32
 var dailyFlag bool
 var consoleAppender = false
+var serviceName = ""
 
 const (
 	//TimeDayFormat 日期格式化到日
@@ -68,6 +69,11 @@ func SetConsole(isConsole bool) {
 //SetLevel 设置日子级别
 func SetLevel(_level int) {
 	logLevel = _level
+}
+
+//SetServiceName 设置服务名称
+func SetServiceName(name string) {
+	serviceName = name
 }
 
 //RollingLogger 生成按文件大小及数量分割日子类
@@ -140,13 +146,21 @@ func console(msg string) {
 
 func buildJSONMessage(level int, l *LogObj, msg string) string {
 	file, line := getTraceFileLine()
-	logInfo := map[string]interface{}{"atime": time.Now().Format(TimeFormat), "bfile": file + " " + strconv.Itoa(line), "clevel": getTraceLevelName(level)}
+	logInfo := map[string]interface{}{
+		"timestamp": time.Now().Format(TimeFormat),
+		"service":   serviceName,
+		"file":      file + " " + strconv.Itoa(line),
+		"level":     getTraceLevelName(level),
+		"message":   msg,
+	}
 
 	if l != nil {
-		logInfo["dlogid"] = l.logid
-		logInfo["etag"] = l.tag
+		logInfo["guid"] = l.Logid()
+		logInfo["action"] = l.GetTag()
+		if l.GetData() != nil {
+			logInfo["data"] = l.GetData()
+		}
 	}
-	logInfo["msg"] = msg
 	resb, err := json.Marshal(logInfo)
 	if err != nil {
 		log.Println(err.Error())

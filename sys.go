@@ -10,19 +10,19 @@ import (
 func getTraceLevelName(level int) string {
 	switch level {
 	case LOG:
-		return "LOG"
+		return "log"
 	case DEBUG:
-		return "DEBUG"
+		return "debug"
 	case INFO:
-		return "INFO"
+		return "info"
 	case WARN:
-		return "WARN"
+		return "warn"
 	case ERROR:
-		return "ERROR"
+		return "error"
 	case FATAL:
-		return "FATAL"
+		return "fatal"
 	default:
-		return "UNKNOWN"
+		return "unknown"
 	}
 }
 

@@ -9,7 +9,6 @@ import (
 func TestLoggerDefault(t *testing.T) {
 
 	//根据配置文件设置日志等级
-
 	for i := 0; i < 1; i++ {
 		Log("log start")
 		Debug("debug log")
@@ -25,10 +24,18 @@ func TestLoggerDefault(t *testing.T) {
 func TestLoggerRolling(t *testing.T) {
 	SetConsole(true)
 	SetLevel(DEBUG)
+	// JSON(true)
+	SetServiceName("aaaa")
 	//根据配置文件，设置日志路径，日志名，日志切割大小限制
 	RollingLogger("log", "a.log", 10, 1, MB)
 	go func() {
-		logobj := new(LogObj).ID("bbbbbbbbbbbbb").Tag("getUserInfo")
+		logobj := NewLog("bbbbbbbbbbbbb", "get_user_info").Data(map[string]interface{}{
+			"msg_id":     "4002",
+			"arm_code":   "0102",
+			"park_code":  7100000001,
+			"vpl_number": "陕AD1234",
+		})
+		// logobj := new(LogObj)
 		for i := 0; i < 100000; i++ {
 			time.Sleep(1 * time.Millisecond)
 			go func() {
@@ -42,26 +49,25 @@ func TestLoggerRolling(t *testing.T) {
 			}()
 		}
 	}()
-	logobj := new(LogObj).ID("aaaaaaaaaaa").Tag("login").JSON()
-	for i := 0; i < 100000; i++ {
-		time.Sleep(1 * time.Millisecond)
-		go func() {
-			logobj.Log("rolling ", "log start")
-			logobj.Debug("rolling ", "debug log")
-			logobj.Info("rolling ", "info log")
-			logobj.Warn("rolling ", "warn log")
-			logobj.Error("rolling ", "error log")
-			logobj.Fatal("rolling ", "fatal log")
-			logobj.Log("rolling ", "fatal log")
-		}()
-	}
+	// logobj := new(LogObj).ID("aaaaaaaaaaa").Tag("login").JSON()
+	// for i := 0; i < 100000; i++ {
+	// 	time.Sleep(1 * time.Millisecond)
+	// 	go func() {
+	// 		logobj.Log("rolling ", "log start")
+	// 		logobj.Debug("rolling ", "debug log")
+	// 		logobj.Info("rolling ", "info log")
+	// 		logobj.Warn("rolling ", "warn log")
+	// 		logobj.Error("rolling ", "error log")
+	// 		logobj.Fatal("rolling ", "fatal log")
+	// 		logobj.Log("rolling ", "fatal log")
+	// 	}()
+	// }
 
 	time.Sleep(30 * time.Second)
 }
 
-/*
 func TestLoggerDaily(t *testing.T) {
-	//SetConsole(true)
+	SetConsole(true)
 	DailyLogger("log", "a.log")
 	//根据配置文件，设置日志路径，日志名，日志切割大小限制
 	for i := 0; i < 100000000; i++ {
@@ -75,4 +81,3 @@ func TestLoggerDaily(t *testing.T) {
 		time.Sleep(time.Microsecond * 100)
 	}
 }
-*/

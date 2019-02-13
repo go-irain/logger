@@ -4,7 +4,13 @@ package logger
 type LogObj struct {
 	logid string
 	tag   string
+	data  interface{}
 	json  bool
+}
+
+//NewLog 生成logobj对象
+func NewLog(logid, tag string) *LogObj {
+	return new(LogObj).ID(logid).Tag(tag)
 }
 
 //ID 设置id
@@ -21,10 +27,30 @@ func (l *LogObj) Tag(tag string) *LogObj {
 	return l
 }
 
+//Data  设置数据对象
+func (l *LogObj) Data(d interface{}) *LogObj {
+	l.data = d
+	return l
+}
+
 //JSON 设置日志格式为json
 func (l *LogObj) JSON() *LogObj {
 	l.json = true
 	return l
+}
+
+//Logid 获取logid
+func (l *LogObj) Logid() string {
+	return l.logid
+}
+
+//GetTag 返回tag
+func (l *LogObj) GetTag() string {
+	return l.tag
+}
+
+func (l *LogObj) GetData() interface{} {
+	return l.data
 }
 
 //UnJSON 设置日志非json格式

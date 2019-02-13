@@ -63,7 +63,7 @@ func Post(url, param string) (string, error) {
 	request.Header.Set("Content-Type", "application/x-www-form-urlencoded;charset=UTF-8")
 	response, err := client.Do(request)
 	if err != nil {
-		fmt.Println(err.Error)
+		fmt.Println(err.Error())
 		if strings.Contains(err.Error(), "timeout") {
 			err = errors.New("REQUEST_TIME_OUT")
 		} else {
