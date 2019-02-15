@@ -56,7 +56,7 @@ const (
 	//TimeFormat 日期格式化到秒
 	TimeFormat = "2006-01-02 15:04:05"
 	//TimeFormat2 毫秒时间
-	TimeFormat2 = "2006-01-02T15:04:05.000Z"
+	TimeFormat2 = "2006-01-02T15:04:05.000"
 )
 
 var logFormat = "%s %s:%d %s %s"
