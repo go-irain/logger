@@ -55,6 +55,8 @@ const (
 	TimeDayFormat = "2006-01-02"
 	//TimeFormat 日期格式化到秒
 	TimeFormat = "2006-01-02 15:04:05"
+	//TimeFormat2 毫秒时间
+	TimeFormat2 = "2006-01-02T15:04:05.000Z"
 )
 
 var logFormat = "%s %s:%d %s %s"
@@ -147,7 +149,7 @@ func console(msg string) {
 func buildJSONMessage(level int, l *LogObj, msg string) string {
 	file, line := getTraceFileLine()
 	logInfo := map[string]interface{}{
-		"timestamp": time.Now().Format(TimeFormat),
+		"timestamp": time.Now().Format(TimeFormat2),
 		"service":   serviceName,
 		"file":      file + " " + strconv.Itoa(line),
 		"level":     getTraceLevelName(level),
