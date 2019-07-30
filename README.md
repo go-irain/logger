@@ -93,3 +93,7 @@ LogOjb对象JSON方法设置了则以json格式输出，正常模式下以文本
 
     logger.Debug("remote","warning will send by sms")
 ```
+
+
+# 日志文件名格式
+文件名支持带"-"文件名和普通文件分割（例:bc7fg-a.log和a.log）

@@ -5,6 +5,7 @@ import (
 	"os"
 	"path/filepath"
 	"sort"
+	"strings"
 	"sync"
 	"time"
 )
@@ -72,16 +73,34 @@ func (f *LogFile) write(data []byte) (int, error) {
 
 // 获取目录下指定前缀的所有日志文件
 func (f *LogFile) removeFiles() {
-	fs, err := filepath.Glob(fmt.Sprintf("%s/%s.*", f.dir, f.filename))
+	a := strings.Split(f.filename, "-")
+	fname := f.filename
+	if len(a) > 1 {
+		fname = a[1]
+	}
+	fs, err := filepath.Glob(fmt.Sprintf("%s/*%s*", f.dir, fname))
 	if err != nil {
 		return
 	}
 	sort.Strings(fs)
 	x := len(fs) - (int(maxFileCount) - 1)
 	if maxFileCount > 0 && x > 0 {
-		dels := fs[:x]
+		tt := make([]string, len(fs))
+		mapp := make(map[string]interface{})
+		for k, v := range fs {
+			st := strings.Split(v, ".")
+			if len(st) > 2 {
+				tt[k] = st[2]
+			} else {
+				fi, _ := os.Stat(v)
+				tt[k] = fi.ModTime().Format("20060102150405")
+			}
+			mapp[tt[k]] = v
+		}
+		sort.Strings(tt)
+		dels := tt[:x]
 		for _, v := range dels {
-			os.Remove(v)
+			os.Remove(mapp[v].(string))
 		}
 	}
 }
