@@ -22,33 +22,29 @@ func TestLoggerDefault(t *testing.T) {
 }
 
 func TestLoggerRolling(t *testing.T) {
-	SetConsole(true)
+	SetConsole(false)
 	SetLevel(DEBUG)
 	// JSON(true)
 	SetServiceName("aaaa")
 	//根据配置文件，设置日志路径，日志名，日志切割大小限制
 	RollingLogger("log", "a.log", 10, 1, MB)
-	go func() {
-		logobj := NewLog("bbbbbbbbbbbbb", "get_user_info").Data(map[string]interface{}{
-			"msg_id":     "4002",
-			"arm_code":   "0102",
-			"park_code":  7100000001,
-			"vpl_number": "陕AD1234",
-		})
-		// logobj := new(LogObj)
-		for i := 0; i < 100000; i++ {
-			time.Sleep(1 * time.Millisecond)
-			go func() {
-				logobj.Log("rolling ", "log start")
-				logobj.Debug("rolling ", "debug log")
-				logobj.Info("rolling ", "info log")
-				logobj.Warn("rolling ", "warn log")
-				logobj.Error("rolling ", "error log")
-				logobj.Fatal("rolling ", "fatal log")
-				logobj.Log("rolling ", "fatal log")
-			}()
-		}
-	}()
+	logobj := NewLog("bbbbbbbbbbbbb", "get_user_info").Data(map[string]interface{}{
+		"msg_id":     "4002",
+		"arm_code":   "0102",
+		"park_code":  7100000001,
+		"vpl_number": "陕AD1234",
+	})
+	// logobj := new(LogObj)
+	for i := 0; i < 100000; i++ {
+		logobj.Log("rolling ", "log start")
+		logobj.Debug("rolling ", "debug log")
+		logobj.Info("rolling ", "info log")
+		logobj.Warn("rolling ", "warn log")
+		logobj.Error("rolling ", "error log")
+		logobj.Fatal("rolling ", "fatal log")
+		logobj.Log("rolling ", "fatal log")
+		time.Sleep(time.Microsecond * 10)
+	}
 	// logobj := new(LogObj).ID("aaaaaaaaaaa").Tag("login").JSON()
 	// for i := 0; i < 100000; i++ {
 	// 	time.Sleep(1 * time.Millisecond)
@@ -63,7 +59,6 @@ func TestLoggerRolling(t *testing.T) {
 	// 	}()
 	// }
 
-	time.Sleep(30 * time.Second)
 }
 
 func TestLoggerDaily(t *testing.T) {
@@ -78,6 +73,6 @@ func TestLoggerDaily(t *testing.T) {
 		Error("daily ", "error log")
 		Fatal("daily ", "fatal log")
 		Log("daily ", "log log")
-		time.Sleep(time.Microsecond * 100)
+		time.Sleep(time.Microsecond * 10)
 	}
 }

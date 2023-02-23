@@ -41,7 +41,7 @@ const (
 	OS_OTHERS
 )
 
-//日志结构对象
+// 日志结构对象
 var logObj *LogFile
 var logLevel = 1
 var maxFileSize int64
@@ -63,27 +63,27 @@ var logFormat = "%s %s:%d %s %s"
 var logObjFormat = "%s %s:%d %s %s %s %s"
 var consoleFormat = "%s:%d %s %s"
 
-//SetConsole 设置终端是否显示
+// SetConsole 设置终端是否显示
 func SetConsole(isConsole bool) {
 	consoleAppender = isConsole
 }
 
-//SetLevel 设置日子级别
+// SetLevel 设置日子级别
 func SetLevel(_level int) {
 	logLevel = _level
 }
 
-//SetServiceName 设置服务名称
+// SetServiceName 设置服务名称
 func SetServiceName(name string) {
 	serviceName = name
 }
 
-//RollingLogger 生成按文件大小及数量分割日子类
+// RollingLogger 生成按文件大小及数量分割日子类
 func RollingLogger(fileDir, fileName string, maxNumber int32, maxSize int64, _unit UNIT) {
 	rollingLogger(fileDir, fileName, maxNumber, maxSize, _unit)
 }
 
-//SetRollingFile 生成按文件大小及数量分割日子类
+// SetRollingFile 生成按文件大小及数量分割日子类
 func SetRollingFile(fileDir, fileName string, maxNumber int32, maxSize int64, _unit UNIT) {
 	rollingLogger(fileDir, fileName, maxNumber, maxSize, _unit)
 }
@@ -105,7 +105,7 @@ func rollingLogger(fileDir, fileName string, maxNumber int32, maxSize int64, _un
 	logObj.filesize = fi.Size()
 }
 
-//DailyLogger new按日期分割日子类
+// DailyLogger new按日期分割日子类
 func DailyLogger(fileDir, filename string) {
 	dailyLogger(fileDir, filename)
 }
@@ -188,7 +188,7 @@ func catchError() {
 	}
 }
 
-//JSON 设置日志格式
+// JSON 设置日志格式
 func JSON(js bool) {
 	if js {
 		logObj.SetJSON()
@@ -197,7 +197,7 @@ func JSON(js bool) {
 	}
 }
 
-//Trace write
+// Trace write
 func Trace(level int, l *LogObj, v ...interface{}) bool {
 	defer catchError()
 	if logObj != nil {
@@ -212,13 +212,7 @@ func Trace(level int, l *LogObj, v ...interface{}) bool {
 		logStr = buildLogMessage(level, l, msg)
 	}
 	console(logStr)
-	if v[0] != nil {
-		if remote, ok := v[0].(string); ok && remote == "remote" {
-			remoteMsg := concat(" ", v[1:]...)
-			go httpLog(remoteMsg)
-		}
-	}
-	if level >= logLevel {
+	if level >= logLevel && !consoleAppender {
 		if logObj != nil {
 			_, err := logObj.write([]byte(logStr))
 			if err != nil {
@@ -230,32 +224,32 @@ func Trace(level int, l *LogObj, v ...interface{}) bool {
 	return true
 }
 
-//Log LOG
+// Log LOG
 func Log(v ...interface{}) bool {
 	return Trace(LOG, nil, v...)
 }
 
-//Debug DEBUG
+// Debug DEBUG
 func Debug(v ...interface{}) bool {
 	return Trace(DEBUG, nil, v...)
 }
 
-//Info INFO
+// Info INFO
 func Info(v ...interface{}) bool {
 	return Trace(INFO, nil, v...)
 }
 
-//Warn WARN
+// Warn WARN
 func Warn(v ...interface{}) bool {
 	return Trace(WARN, nil, v...)
 }
 
-//Error ERROR
+// Error ERROR
 func Error(v ...interface{}) bool {
 	return Trace(ERROR, nil, v...)
 }
 
-//Fatal FATAL
+// Fatal FATAL
 func Fatal(v ...interface{}) bool {
 	return Trace(FATAL, nil, v...)
 }
