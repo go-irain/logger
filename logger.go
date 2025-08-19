@@ -175,9 +175,9 @@ func buildLogMessage(level int, l *LogObj, msg string) string {
 	file, line := getTraceFileLine()
 	logInfo := ""
 	if l == nil {
-		logInfo = fmt.Sprintf(logFormat+getOsEol(), time.Now().Format(TimeFormat), file, line, getTraceLevelName(level), msg)
+		logInfo = fmt.Sprintf(logFormat+getOsEol(), time.Now().Format(TimeFormat2), file, line, getTraceLevelName(level), msg)
 	} else {
-		logInfo = fmt.Sprintf(logObjFormat+getOsEol(), time.Now().Format(TimeFormat), file, line, l.logid, l.tag, getTraceLevelName(level), msg)
+		logInfo = fmt.Sprintf(logObjFormat+getOsEol(), time.Now().Format(TimeFormat2), file, line, l.logid, l.tag, getTraceLevelName(level), msg)
 	}
 	return logInfo
 }
